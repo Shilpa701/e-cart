@@ -1,28 +1,99 @@
-import React from 'react'
+import React, { useEffect, useState,} from 'react'
 import Header from '../components/Header'
+import { useParams } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+// import { addToWishlist } from '../redux/slices/wishlistSlice'
+
+import { addToWishlist } from '../redux/slices/wishlistSlice'
+import { addTocart } from '../redux/slices/cartSlice'
+
+
 
 const View = () => {
+  const userCart = useSelector(state=>state.cartReducer)
+  const dispatch = useDispatch()
+  const userWishlist = useSelector(state=>state.wishlistReducer)
+  const [product,setProduct] = useState({})
+  const {id} = useParams() 
+  console.log(id);
+
+
+  
+ useEffect(()=>{
+
+  if(sessionStorage.getItem("allproducts")){
+    const allProducts = JSON.parse(sessionStorage.getItem("allproducts"))
+    console.log(allProducts.find(item=>item.id==id));
+    setProduct(allProducts.find(item=>item.id==id))
+ 
+  }
+  
+ },[])
+
+
+ const handleWishlist = ()=>{
+  const existingProduct = userWishlist?.find(item=>item?.id==id)
+  if(existingProduct){
+    alert("Product already in your Wishlist!!")
+  }else{
+    dispatch(addToWishlist(product))
+  }
+ }
+
+ const handleCart = ()=>{
+  dispatch(addTocart(product))
+  const existingProduct = userCart?.find(item=>item?.id==id)
+  if(existingProduct){
+    alert("Product Quantity is incrementing!!!")
+  }else{
+   alert("Product added to Cart")
+  }
+ }
+
+
   return (
     <>
    <Header/>
     <div className='flex flex-col mx-5'>
      <div className='grid grid-cols-2 items-center h-screen'>
-     <img width={'100%'} height={'200px'} src="https://img.freepik.com/free-vector/shopping-supermarket-cart-with-grocery-pictogram_1284-11697.jpg?semt=ais_hybrid" alt="" />
+     <img width={'100%'} height={'200px'} src={product?.
+thumbnail
+} alt="" />
 
 
      <div>
-    <h3 className='font-bold'> PID : id</h3>
-    <h1 className='text-5xl font-bold'>Product Name</h1>
-    <h4 className='font-bold text-red-600 text-2xl'>$ 250</h4>
-    <h4>Brand : brand</h4>
-    <h4>Category : category</h4>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Error quam fugiat accusantium vero doloribus quasi mollitia consequatur ipsam reiciendis animi numquam, veniam temporibus est autem rem, voluptatibus non nisi optio.</p>
+    <h3 className='font-bold'> PID : {product?.id}</h3>
+    <h1 className='text-5xl font-bold'>{product?.title}</h1>
+    <h4 className='font-bold text-red-600 text-2xl'>$ {product?.price} </h4>
+    <h4>Brand : {product?.brand
+    }</h4>
+    <h4>Category : {product?.
+category}</h4>
+    <p><span>Description</span> {product?.description
+
+}</p>
+  
+    <h3 className='font-bold'>Client Reviews</h3>
+    {
+      product?.reviews?.length>0?
+      product?.reviews?.map(item=>
+        <div key={item?.date} className='shadow-border p-2 mb-2'>
+        <h5>
+      <span className='font-bold'>{item?.reviewrName}</span>: <span>{item?.comment}</span>
+       </h5>
+       <p>Rating:{item?.rating}  <i className='fa-solid fa-star text-yellow-400'></i></p>
+        </div>
+      )
+      :
+      <div>No Review Yet!!!</div>
+    }
     <div className='flex justify-between mt-5'>
-        <button className='bg-blue-600 text-white p-2'>Add to Wishlist</button>
-        <button className='bg-green-600 text-white p-2'>Add to Cart</button>
+        <button onClick={handleWishlist} className='bg-blue-600 text-white p-2'>Add to Wishlist</button>
+        <button  onClick={ handleCart }className='bg-green-600 text-white p-2'>Add to Cart</button>
 
     </div>
    </div>
+   
  </div>
 </div>
     
